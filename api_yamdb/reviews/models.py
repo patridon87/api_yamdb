@@ -1,15 +1,35 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import (
+    MinValueValidator, 
+    MaxValueValidator, 
+    RegexValidator
+    )
 
 
 class User(AbstractUser):
-    roles = ('user', 'moderator', 'admin')
+    ROLES = (('user', 'USER'), ('moderator', 'MODERATOR'), ('admin', 'ADMIN'))
+    username = models.CharField(
+        max_length=150, 
+        validators=[RegexValidator('^[\w.@+-]+\z')],
+        unique=True
+        )
+    email = models.EmailField(max_length=254, unique=True)
+    first_name = models.CharField(max_length=150)
+    last_name = models.CharField(max_length=150)
     bio = models.TextField(
         verbose_name='Биография', 
         blank=True
         )
-    role = models.CharField(choices=roles)
+    role = models.CharField(max_length=300, choices=ROLES, default=ROLES[0][0])
+
+    def __str__(self):
+        return f'{self.username}'
+
+
+class ConfirmationCode(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=4)
 
 
 class Title(models.Model):
