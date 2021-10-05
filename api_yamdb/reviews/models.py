@@ -28,8 +28,8 @@ class Review(models.Model):
     )
     score = models.IntegerField(
         validators=[
-            MinValueValidator(1, 'Значение ниже допустимого'),
-            MaxValueValidator(100, 'Значение выше допустимого')
+            MinValueValidator(1, 'Оценка не может быть ниже 1'),
+            MaxValueValidator(10, 'Оценка не может быть больше 10')
         ],
         verbose_name='Оценка'
     )
