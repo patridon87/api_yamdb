@@ -8,14 +8,9 @@ from django.db import models
 
 class User(AbstractUser):
     ROLES = (('user', 'USER'), ('moderator', 'MODERATOR'), ('admin', 'ADMIN'))
-    username = models.CharField(
-        max_length=150,
-        validators=[RegexValidator('^[\w.@+-]+\z')],
-        unique=True
-    )
-    email = models.EmailField(max_length=254, unique=True)
+
+    email = models.EmailField(max_length=254, unique=True, blank=False)
     first_name = models.CharField(max_length=150)
-    last_name = models.CharField(max_length=150)
     bio = models.TextField(
         verbose_name='Биография',
         blank=True
@@ -183,3 +178,4 @@ class Comment(models.Model):
 
     def __str__(self):
         return f'Комментарий {self.text} от {self.author} к {self.review}'
+        
