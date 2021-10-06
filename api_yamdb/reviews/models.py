@@ -1,4 +1,4 @@
-import datetime
+import datetime as dt
 
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import (MaxValueValidator, MinValueValidator,
@@ -47,7 +47,6 @@ class Category(models.Model):
     )
 
     class Meta:
-        ordering = ['title']
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
@@ -71,7 +70,6 @@ class Genre(models.Model):
     )
 
     class Meta:
-        ordering = ['name']
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
 
@@ -90,7 +88,7 @@ class Title(models.Model):
         verbose_name='Год создания',
         validators=[
             MinValueValidator(0),
-            MaxValueValidator(datetime.now().year)],
+            MaxValueValidator(dt.datetime.now().year)],
         help_text="Используйте формат года: YYYY")
     description = models.TextField(
         blank=True, null=True,
@@ -106,13 +104,10 @@ class Title(models.Model):
     )
     genre = models.ManyToManyField(
         Genre,
-        on_delete=models.SET_NULL,
-        blank=True, null=True,
         through='GenreTitle',
     )
 
     class Meta:
-        ordering = ['name']
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
 
