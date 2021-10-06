@@ -84,7 +84,7 @@ class Title(models.Model):
         validators=[
             MinValueValidator(0),
             MaxValueValidator(dt.datetime.now().year)],
-        help_text="Используйте формат года: YYYY")
+        help_text='Используйте формат года: YYYY')
     description = models.TextField(
         blank=True, null=True,
         verbose_name='Описание произведения',
@@ -141,6 +141,7 @@ class Review(models.Model):
             MinValueValidator(1, 'Оценка не может быть ниже 1'),
             MaxValueValidator(10, 'Оценка не может быть больше 10')
         ],
+        help_text='Поставьте оценку от 1 до 10',
         verbose_name='Оценка'
     )
 
