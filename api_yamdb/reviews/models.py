@@ -1,50 +1,25 @@
 import datetime
 
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import (MaxValueValidator, MinValueValidator,
+                                    RegexValidator)
 from django.db import models
-from django.core.validators import (
-    MinValueValidator, 
-    MaxValueValidator, 
-    RegexValidator
-    )
-
-
-CATEGORIES = (
-    ('Books', 'Книги'),
-    ('Movies', 'Фильмы'),
-    ('Music', 'Музыка'),
-)
-
-TITLE_CHOICES = [
-    ('Books', (
-        ('Fiction', 'Фантастика'),
-        ('Classic', 'Классика'),
-        ('Detective', 'Детектив'),)),
-    ('Music', (
-        ('Rock-n-Roll', 'Рок-н-Ролл'),
-        ('Classic', 'Классика'),
-        ('Blues', 'Блюз'),)),
-    ('Movies', (
-        ('Drama', 'Драма'),
-        ('Comedy', 'Комедия'),
-        ('Detective', 'Детектив'),)),
-]
 
 
 class User(AbstractUser):
     ROLES = (('user', 'USER'), ('moderator', 'MODERATOR'), ('admin', 'ADMIN'))
     username = models.CharField(
-        max_length=150, 
+        max_length=150,
         validators=[RegexValidator('^[\w.@+-]+\z')],
         unique=True
-        )
+    )
     email = models.EmailField(max_length=254, unique=True)
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
     bio = models.TextField(
-        verbose_name='Биография', 
+        verbose_name='Биография',
         blank=True
-        )
+    )
     role = models.CharField(max_length=300, choices=ROLES, default=ROLES[0][0])
 
     def __str__(self):
@@ -58,7 +33,10 @@ class ConfirmationCode(models.Model):
 
 class Category(models.Model):
     """Категория произведения."""
-    name = models.CharField(max_length=256, choices=CATEGORIES)
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Название категории',
+    )
     slug = models.SlugField(
         max_length=50,
         unique=True,
@@ -74,12 +52,15 @@ class Category(models.Model):
         verbose_name_plural = 'Категории'
 
     def __str__(self):
-        return self.title
+        return self.name
 
 
 class Genre(models.Model):
     """Жанр произведения."""
-    name = models.CharField(max_length=256, choices=TITLE_CHOICES)
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Название жанра',
+    )
     slug = models.SlugField(
         max_length=50,
         unique=True,
@@ -99,7 +80,7 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
-    """Произведения."""
+    """Произведение."""
     name = models.CharField(
         max_length=256,
         verbose_name='Название произведения',
@@ -111,23 +92,23 @@ class Title(models.Model):
             MinValueValidator(0),
             MaxValueValidator(datetime.now().year)],
         help_text="Используйте формат года: YYYY")
-    rating = models.PositiveIntegerField(default=None, blank=True, null=True)
     description = models.TextField(
-        blank=True,
+        blank=True, null=True,
         verbose_name='Описание произведения',
         help_text='Добавление описания к произведению'
     )
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
+        blank=True, null=True,
         verbose_name='Категория произведения',
         related_name='titles',
     )
     genre = models.ManyToManyField(
         Genre,
         on_delete=models.SET_NULL,
-        verbose_name='Жанр произведения',
-        related_name='titles',
+        blank=True, null=True,
+        through='GenreTitle',
     )
 
     class Meta:
@@ -140,6 +121,7 @@ class Title(models.Model):
 
 
 class GenreTitle(models.Model):
+    """В этой модели будут связаны id жанра и id произведения."""
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
 
@@ -204,4 +186,3 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text
-        
