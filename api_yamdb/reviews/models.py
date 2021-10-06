@@ -47,7 +47,6 @@ class Category(models.Model):
     )
 
     class Meta:
-        ordering = ['title']
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
@@ -71,7 +70,6 @@ class Genre(models.Model):
     )
 
     class Meta:
-        ordering = ['name']
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
 
@@ -106,13 +104,10 @@ class Title(models.Model):
     )
     genre = models.ManyToManyField(
         Genre,
-        on_delete=models.SET_NULL,
-        blank=True, null=True,
         through='GenreTitle',
     )
 
     class Meta:
-        ordering = ['name']
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
 
@@ -155,11 +150,12 @@ class Review(models.Model):
     )
 
     class Meta:
+        ordering = ('-pub_date',)
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
 
     def __str__(self):
-        return f'{self.text}'
+        return f'Отзыв {self.text} от {self.author} на {self.title}'
 
 
 class Comment(models.Model):
@@ -181,8 +177,9 @@ class Comment(models.Model):
     )
 
     class Meta:
+        ordering = ('-pub_date',)
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
 
     def __str__(self):
-        return self.text
+        return f'Комментарий {self.text} от {self.author} к {self.review}'
