@@ -150,11 +150,12 @@ class Review(models.Model):
     )
 
     class Meta:
+        ordering = ('-pub_date',)
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
 
     def __str__(self):
-        return f'{self.text}'
+        return f'Отзыв {self.text} от {self.author} на {self.title}'
 
 
 class Comment(models.Model):
@@ -176,8 +177,9 @@ class Comment(models.Model):
     )
 
     class Meta:
+        ordering = ('-pub_date',)
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
 
     def __str__(self):
-        return self.text
+        return f'Комментарий {self.text} от {self.author} к {self.review}'
