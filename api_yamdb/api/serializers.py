@@ -60,14 +60,8 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleReadSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
-    genres = GenreSerializer(many=True)
+    genre = GenreSerializer(many=True)
     rating = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Title
-        fields = (
-            'name', 'year', 'description', 'category',
-            'genre', 'rating', )
 
     def get_rating(self, obj):
         if obj.reviews.exists():
@@ -75,32 +69,24 @@ class TitleReadSerializer(serializers.ModelSerializer):
                 rating=Avg('score')).get('rating'))
         return None
 
+    class Meta:
+        model = Title
+        fields = (
+            'name', 'year', 'description', 'category',
+            'genre', )
+
 
 class TitleSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         slug_field='slug', queryset=Category.objects.all()
     )
-    genres = serializers.SlugRelatedField(
+    genre = serializers.SlugRelatedField(
         slug_field='slug', many=True, queryset=Category.objects.all()
     )
 
     class Meta:
         model = Title
         fields = ('name', 'year', 'description', 'category', 'genre',)
-
-    def create(self, validated_data):
-        if 'genres' not in self.initial_data:
-            title = Title.objects.create(**validated_data)
-            return title
-        else:
-            genres = validated_data.pop('genres')
-            title = Title.objects.create(**validated_data)
-            for genre in genres:
-                current_genre, status = Genre.objects.get_or_create(
-                    **genre)
-                GenreTitle.objects.create(
-                    genre=current_genre, title=title)
-            return title
 
     def validate_year(self, value):
         current_year = dt.datetime.now().year
