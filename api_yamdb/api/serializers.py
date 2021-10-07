@@ -3,12 +3,10 @@ import datetime as dt
 from django.db.models import Avg
 from rest_framework import serializers
 
-from reviews.models import (Category,
-                            Genre,
-                            GenreTitle,
-                            Title,
-                            User,
-                            Review, )
+from reviews.models import (
+    Category, Genre, GenreTitle,
+    Title, User, Review, Comment
+)
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -31,9 +29,8 @@ class UserSerializer(serializers.ModelSerializer):
         fields = (
             'username', 'email', 'first_name',
             'last_name', 'bio', 'role')
-    
-        
-    def valideate(data):
+
+    def validate(data):
         if 'username' not in data:
             raise serializers.ValidationError('Поле username обязательное')
 
@@ -42,6 +39,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create():
         pass
+
 
 class CategorySerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='name')
@@ -141,5 +139,3 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = '__all__'
-        
-
