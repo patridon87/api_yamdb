@@ -112,8 +112,10 @@ class Title(models.Model):
 
 class GenreTitle(models.Model):
     """В этой модели будут связаны id жанра и id произведения."""
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
-    title = models.ForeignKey(Title, on_delete=models.CASCADE)
+    genre = models.ForeignKey(
+        Genre, on_delete=models.SET_NULL, blank=True, null=True,)
+    title = models.ForeignKey(
+        Title, on_delete=models.SET_NULL, blank=True, null=True,)
 
     def __str__(self):
         return f'{self.genre} {self.title}'
