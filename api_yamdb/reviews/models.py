@@ -102,6 +102,7 @@ class Title(models.Model):
     genre = models.ManyToManyField(
         Genre,
         through='GenreTitle',
+        through_fields=('title', 'genre'),
     )
 
     class Meta:
