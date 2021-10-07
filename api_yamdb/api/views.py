@@ -82,7 +82,7 @@ class TitleViewSet(ModelViewSet):
     serializer_class = TitleSerializer
     pagination_class = TitlesPagination
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['category', 'genre', 'title', 'year', ]
+    filterset_fields = ['category__slug', 'genre__slug', 'name', 'year', ]
     permission_classes = [IsAdminOrReadOnly]
 
     def get_serializer_class(self):
