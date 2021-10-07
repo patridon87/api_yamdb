@@ -1,7 +1,10 @@
-import random
-
+from django.core.mail import send_mail
+from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import render
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status, viewsets
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from rest_framework import filters, permissions
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin)
@@ -14,8 +17,24 @@ from .serializers import (CategorySerializer, GenreSerializer,
                           TitleReadSerializer, TitleSerializer)
 from reviews.models import Category, Genre, Title
 
+from .serializers import UserRegistrationSerializer
+
+
+@api_view(['POST'])
 def signUp(request):
-    pass
+    serializer = UserRegistrationSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        user = serializer.instance
+        token = default_token_generator.make_token(user)
+        send_mail(
+            'Код подтверждения',
+            f'Код подтверждения: {token}',
+            'yamdbSIA@gmail.com',
+            [user.email]
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ListCreateDestroyViewSet(GenericViewSet, CreateModelMixin,
@@ -70,3 +89,11 @@ class TitleViewSet(ModelViewSet):
         if self.action in permissions.SAFE_METHODS:
             return TitleReadSerializer
         return TitleSerializer
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    pass
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    pass

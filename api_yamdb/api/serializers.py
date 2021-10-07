@@ -3,7 +3,26 @@ import datetime as dt
 from django.db.models import Avg
 from rest_framework import serializers
 
-from reviews.models import Category, Genre, GenreTitle, Title, User
+from reviews.models import (Category,
+                            Genre,
+                            GenreTitle,
+                            Title,
+                            User,
+                            Review, )
+
+
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('email', 'username')
+
+    def validate(self, data):
+        if data['username'] == 'me':
+            raise serializers.ValidationError('Имя пользователя me запрещено')
+        return data
+
+    # def create(self, validated_data):
+    #     return User.objects.get_or_create(**validated_data)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -12,7 +31,8 @@ class UserSerializer(serializers.ModelSerializer):
         fields = (
             'username', 'email', 'first_name',
             'last_name', 'bio', 'role')
-
+    
+        
     def valideate(data):
         if 'username' not in data:
             raise serializers.ValidationError('Поле username обязательное')
@@ -22,7 +42,6 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create():
         pass
-
 
 class CategorySerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='name')
@@ -91,3 +110,36 @@ class TitleSerializer(serializers.ModelSerializer):
                 'Год выпуска не может быть меньше 0 или больше текущего года!'
             )
         return value
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True,
+        default=serializers.CurrentUserDefault()
+    )
+    title = serializers.SlugRelatedField(
+        slug_field='pk',
+        read_only=True
+    )
+
+    class Meta:
+        fields = '__all__'
+        model = Review
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username'
+    )
+    review = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='text'
+    )
+
+    class Meta:
+        model = Comment
+        fields = '__all__'
+        
+

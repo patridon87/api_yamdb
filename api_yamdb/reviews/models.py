@@ -8,14 +8,9 @@ from django.db import models
 
 class User(AbstractUser):
     ROLES = (('user', 'USER'), ('moderator', 'MODERATOR'), ('admin', 'ADMIN'))
-    username = models.CharField(
-        max_length=150,
-        validators=[RegexValidator('^[\w.@+-]+\z')],
-        unique=True
-    )
-    email = models.EmailField(max_length=254, unique=True)
+
+    email = models.EmailField(max_length=254, unique=True, blank=False)
     first_name = models.CharField(max_length=150)
-    last_name = models.CharField(max_length=150)
     bio = models.TextField(
         verbose_name='Биография',
         blank=True
@@ -71,7 +66,6 @@ class Genre(models.Model):
     )
 
     class Meta:
-        ordering = ['name']
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
 
@@ -91,7 +85,7 @@ class Title(models.Model):
         validators=[
             MinValueValidator(0),
             MaxValueValidator(dt.datetime.now().year)],
-        help_text="Используйте формат года: YYYY")
+        help_text='Используйте формат года: YYYY')
     description = models.TextField(
         blank=True, null=True,
         verbose_name='Описание произведения',
@@ -110,7 +104,6 @@ class Title(models.Model):
     )
 
     class Meta:
-        ordering = ['name']
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
 
@@ -151,15 +144,17 @@ class Review(models.Model):
             MinValueValidator(1, 'Оценка не может быть ниже 1'),
             MaxValueValidator(10, 'Оценка не может быть больше 10')
         ],
+        help_text='Поставьте оценку от 1 до 10',
         verbose_name='Оценка'
     )
 
     class Meta:
+        ordering = ('-pub_date',)
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
 
     def __str__(self):
-        return f'{self.text}'
+        return f'Отзыв {self.text} от {self.author} на {self.title}'
 
 
 class Comment(models.Model):
@@ -181,8 +176,10 @@ class Comment(models.Model):
     )
 
     class Meta:
+        ordering = ('-pub_date',)
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
 
     def __str__(self):
-        return self.text
+        return f'Комментарий {self.text} от {self.author} к {self.review}'
+        
