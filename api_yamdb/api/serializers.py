@@ -19,8 +19,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Имя пользователя me запрещено')
         return data
 
-    # def create(self, validated_data):
-    #     return User.objects.get_or_create(**validated_data)
+    def create(self, validated_data):
+        user = User.objects.get_or_create(**validated_data)
+        return user[0]
 
 
 class UserSerializer(serializers.ModelSerializer):
