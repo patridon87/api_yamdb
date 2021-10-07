@@ -2,14 +2,14 @@ import random
 
 from django.shortcuts import render
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters
+from rest_framework import filters, permissions
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin)
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from .pagination import TitlesPagination
-from .permissions import SAFE_METHODS, IsAdminOrReadOnly, IsOwnerOrReadOnly
+from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
 from .serializers import (CategorySerializer, GenreSerializer,
                           TitleReadSerializer, TitleSerializer)
 from reviews.models import Category, Genre, Title
@@ -67,6 +67,6 @@ class TitleViewSet(ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
 
     def get_serializer_class(self):
-        if self.action in SAFE_METHODS:
+        if self.action in permissions.SAFE_METHODS:
             return TitleReadSerializer
         return TitleSerializer
