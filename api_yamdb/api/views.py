@@ -1,21 +1,23 @@
 from django.core.mail import send_mail
 from django.contrib.auth.tokens import default_token_generator
-from django.shortcuts import render
+from django.http.response import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import requires_csrf_token
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, filters, permissions
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework import filters, permissions
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin)
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .pagination import TitlesPagination
 from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
 from .serializers import (CategorySerializer, GenreSerializer,
-                          TitleReadSerializer, TitleSerializer)
-from reviews.models import Category, Genre, Title
+                          TitleReadSerializer, TitleSerializer,)
+from reviews.models import Category, Genre, Title, User
 
 from .serializers import UserRegistrationSerializer
 
@@ -34,7 +36,46 @@ def signUp(request):
             [user.email]
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    if User.objects.filter(**request.data).exists():
+        user = User.objects.get(**request.data)
+        token = default_token_generator.make_token(user)
+        send_mail(
+            'Код подтверждения',
+            f'Код подтверждения: {token}',
+            'yamdbSIA@gmail.com',
+            [user.email]
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+def get_tokens_for_user(user):
+    refresh = RefreshToken.for_user(user)
+
+    return {
+        'access': str(refresh.access_token),
+    }
+
+
+@api_view(['POST'])
+def get_token(request):
+    username=request.data.get('username')
+    token = request.data.get('confirmation_code')
+    if username is not None and token is not None:
+        user = get_object_or_404(User, username=username)
+   
+        if default_token_generator.check_token(user, token):
+            return Response(get_tokens_for_user(user))
+        return Response(
+            data='Код подтверждения не верный', 
+            status=status.HTTP_400_BAD_REQUEST
+            )
+        
+    return Response(
+        data='Пользователь не найден', 
+        status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class ListCreateDestroyViewSet(GenericViewSet, CreateModelMixin,

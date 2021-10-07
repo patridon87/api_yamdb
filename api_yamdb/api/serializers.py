@@ -2,6 +2,8 @@ import datetime as dt
 
 from django.db.models import Avg
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from reviews.models import (
     Category, Genre, GenreTitle,
@@ -19,9 +21,17 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Имя пользователя me запрещено')
         return data
 
-    def create(self, validated_data):
-        user = User.objects.get_or_create(**validated_data)
-        return user[0]
+
+# class MyTokenObtainSerializer(TokenObtainSerializer):
+#     @classmethod
+#     def get_token(cls, user):
+#         return RefreshToken.for_user(user)
+
+#     def validate(self, attrs):
+#         data = super().validate(attrs)
+#         refresh = self.get_token(self.user)
+#         data['access'] = str(refresh.access_token)
+#         return data
 
 
 class UserSerializer(serializers.ModelSerializer):
