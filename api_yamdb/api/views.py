@@ -15,7 +15,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .pagination import TitlesPagination
 from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly, IsAdmin
 from .serializers import (CategorySerializer, GenreSerializer, CommentSerializer,
-                          TitleReadSerializer, TitleSerializer, ReviewSerializer
+                          TitleReadSerializer, TitleSerializer, ReviewSerializer,
                           UserSerializer,)
 from reviews.models import (Comment, Category, Genre,
                             Title, User, Review)
