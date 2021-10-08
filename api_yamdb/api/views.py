@@ -1,22 +1,21 @@
 from django.core.mail import send_mail
 from django.contrib.auth.tokens import default_token_generator
-from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
-from django.views.decorators.csrf import requires_csrf_token
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets, filters, permissions
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin)
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework import permissions
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .pagination import TitlesPagination
-from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly
+from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly, IsAdmin
 from .serializers import (CategorySerializer, GenreSerializer,
-                          TitleReadSerializer, TitleSerializer,)
+                          TitleReadSerializer, TitleSerializer,
+                          UserSerializer,)
 from reviews.models import Category, Genre, Title, User
 
 from .serializers import UserRegistrationSerializer
@@ -77,6 +76,22 @@ def get_token(request):
         status=status.HTTP_400_BAD_REQUEST
         )
 
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    lookup_field = 'username'
+    serializer_class = UserSerializer
+    permission_classes = [IsAdmin,]
+    http_method_names = ['get', 'post', 'patch', 'delete']
+
+    # def get_permissions(self):
+    #     if self.action in ['create', 'update', 'list', 'ratrive'] and not self.request.user.is_authenticated:
+    #         self.permission_classes = [permissions.IsAuthenticated]
+    #         # return Response(data='Доступ запрщен. Авторизуйтесь', status=status.HTTP_401_UNAUTHORIZED)
+    #     else:
+    #         self.permission_classes = [IsAdmin]
+    #     return super().get_permissions()
+    
 
 class ListCreateDestroyViewSet(GenericViewSet, CreateModelMixin,
                                DestroyModelMixin, ListModelMixin):

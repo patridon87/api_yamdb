@@ -1,8 +1,8 @@
 import datetime as dt
 
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import (MaxValueValidator, MinValueValidator,
-                                    RegexValidator)
+from django.core.validators import MaxValueValidator, MinValueValidator
+
 from django.db import models
 
 
@@ -16,14 +16,13 @@ class User(AbstractUser):
         blank=True
     )
     role = models.CharField(max_length=300, choices=ROLES, default=ROLES[0][0])
+    
+    def is_admin(self):
+        if self.role == 'admin':
+            self.is_staff = True
 
     def __str__(self):
         return f'{self.username}'
-
-
-class ConfirmationCode(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    code = models.CharField(max_length=4)
 
 
 class Category(models.Model):
