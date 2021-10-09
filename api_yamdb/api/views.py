@@ -14,14 +14,14 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .pagination import TitlesPagination
 from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly, IsAdmin, ReviewCommentPermission
-from .serializers import (CategorySerializer, GenreSerializer, CommentSerializer,
+from .serializers import (CategorySerializer, UserRegistrationSerializer, GenreSerializer, CommentSerializer,
                           TitleReadSerializer, TitleSerializer, ReviewSerializer,
-                          UserSerializer, )
+                          UserSerializer, UserProfileSerializer)
 
 from reviews.models import (Comment, Category, Genre,
                             Title, User, Review)
 
-from .serializers import UserRegistrationSerializer
+
 
 
 @api_view(['POST'])
@@ -85,8 +85,6 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdmin]
     http_method_names = ['get', 'post', 'patch', 'delete']
 
-<<<<<<< HEAD
-=======
 
 @api_view(['GET', 'PATCH'])
 def user_profile(request):
@@ -102,7 +100,6 @@ def user_profile(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(data='Пожалуйста, авторизуйтесь', status=status.HTTP_401_UNAUTHORIZED)
 
->>>>>>> serg
 
 class ListCreateDestroyViewSet(GenericViewSet, CreateModelMixin,
                                DestroyModelMixin, ListModelMixin):
