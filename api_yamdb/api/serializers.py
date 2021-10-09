@@ -2,8 +2,6 @@ import datetime as dt
 
 from django.db.models import Avg
 from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
 
 from reviews.models import (
     Category, Genre,
@@ -28,6 +26,23 @@ class UserSerializer(serializers.ModelSerializer):
         fields = (
             'username', 'email', 'first_name',
             'last_name', 'bio', 'role')
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'username', 'email', 'first_name',
+            'last_name', 'bio', 'role')
+
+    def validate(self, data):
+        request = self.context['request']
+        method = request.method
+        user = request.user
+        if method == 'PATCH' and user.role == 'user' and 'role' in data:
+            data.pop('role')
+        return data
+
 
 
 class CategorySerializer(serializers.ModelSerializer):
