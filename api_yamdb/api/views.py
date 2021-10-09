@@ -15,10 +15,9 @@ from .pagination import TitlesPagination
 from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly, IsAdmin
 from .serializers import (CategorySerializer, GenreSerializer,
                           TitleReadSerializer, TitleSerializer,
-                          UserSerializer,)
+                          UserRegistrationSerializer, UserSerializer,)
 from reviews.models import Category, Genre, Title, User
 
-from .serializers import UserRegistrationSerializer
 
 
 @api_view(['POST'])
@@ -81,16 +80,9 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     lookup_field = 'username'
     serializer_class = UserSerializer
-    permission_classes = [IsAdmin,]
+    permission_classes = [IsAdmin]
     http_method_names = ['get', 'post', 'patch', 'delete']
 
-    # def get_permissions(self):
-    #     if self.action in ['create', 'update', 'list', 'ratrive'] and not self.request.user.is_authenticated:
-    #         self.permission_classes = [permissions.IsAuthenticated]
-    #         # return Response(data='Доступ запрщен. Авторизуйтесь', status=status.HTTP_401_UNAUTHORIZED)
-    #     else:
-    #         self.permission_classes = [IsAdmin]
-    #     return super().get_permissions()
     
 
 class ListCreateDestroyViewSet(GenericViewSet, CreateModelMixin,

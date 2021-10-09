@@ -29,17 +29,6 @@ class UserSerializer(serializers.ModelSerializer):
             'username', 'email', 'first_name',
             'last_name', 'bio', 'role')
 
-    def validate(data):
-        if 'username' not in data:
-            raise serializers.ValidationError('Поле username обязательное')
-
-        if 'email' not in data:
-            raise serializers.ValidationError('Поле email обязательное')
-
-        if data['username'] == 'me':
-            raise serializers.ValidationError('Имя пользователя me запрещено')
-        return data
-
 
 class CategorySerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='name')
