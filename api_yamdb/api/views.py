@@ -83,7 +83,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     lookup_field = 'username'
     serializer_class = UserSerializer
-    permission_classes = [IsAdmin,]
+    permission_classes = [IsAdmin]
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     
