@@ -15,8 +15,10 @@ class IsAdminOrReadOnly(permissions.BasePermission):
     message = "Access only for moderator or admin!"
 
     def has_permission(self, request, view):
+        if not request.user.is_authenticated:
+            return(request.method in permissions.SAFE_METHODS)
         return (request.method in permissions.SAFE_METHODS
-                or request.user.is_staff)
+                or request.user.role == 'admin' or request.user.is_superuser)
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
