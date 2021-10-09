@@ -10,7 +10,7 @@ class User(AbstractUser):
     ROLES = (('user', 'USER'), ('moderator', 'MODERATOR'), ('admin', 'ADMIN'))
 
     email = models.EmailField(max_length=254, unique=True, blank=False)
-    first_name = models.CharField(max_length=150)
+    first_name = models.CharField(max_length=150, blank=True)
     bio = models.TextField(
         verbose_name='Биография',
         blank=True

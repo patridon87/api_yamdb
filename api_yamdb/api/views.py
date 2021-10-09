@@ -86,13 +86,6 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdmin,]
     http_method_names = ['get', 'post', 'patch', 'delete']
 
-    # def get_permissions(self):
-    #     if self.action in ['create', 'update', 'list', 'ratrive'] and not self.request.user.is_authenticated:
-    #         self.permission_classes = [permissions.IsAuthenticated]
-    #         # return Response(data='Доступ запрщен. Авторизуйтесь', status=status.HTTP_401_UNAUTHORIZED)
-    #     else:
-    #         self.permission_classes = [IsAdmin]
-    #     return super().get_permissions()
     
 
 class ListCreateDestroyViewSet(GenericViewSet, CreateModelMixin,
