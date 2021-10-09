@@ -13,10 +13,10 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .pagination import TitlesPagination
-from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly, IsAdmin
+from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly, IsAdmin, ReviewCommentPermission
 from .serializers import (CategorySerializer, GenreSerializer, CommentSerializer,
                           TitleReadSerializer, TitleSerializer, ReviewSerializer,
-                          UserSerializer,)
+                          UserSerializer, )
 from reviews.models import (Comment, Category, Genre,
                             Title, User, Review)
 
@@ -61,22 +61,22 @@ def get_tokens_for_user(user):
 
 @api_view(['POST'])
 def get_token(request):
-    username=request.data.get('username')
+    username = request.data.get('username')
     token = request.data.get('confirmation_code')
     if username is not None and token is not None:
         user = get_object_or_404(User, username=username)
-   
+
         if default_token_generator.check_token(user, token):
             return Response(get_tokens_for_user(user))
         return Response(
-            data='Код подтверждения не верный', 
+            data='Код подтверждения не верный',
             status=status.HTTP_400_BAD_REQUEST
-            )
-        
-    return Response(
-        data='Пользователь не найден', 
-        status=status.HTTP_400_BAD_REQUEST
         )
+
+    return Response(
+        data='Пользователь не найден',
+        status=status.HTTP_400_BAD_REQUEST
+    )
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -86,7 +86,6 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdmin]
     http_method_names = ['get', 'post', 'patch', 'delete']
 
-    
 
 class ListCreateDestroyViewSet(GenericViewSet, CreateModelMixin,
                                DestroyModelMixin, ListModelMixin):
@@ -144,7 +143,7 @@ class TitleViewSet(ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [ReviewCommentPermission]
     pagination_class = TitlesPagination
 
     def get_queryset(self):
@@ -159,7 +158,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [ReviewCommentPermission]
     pagination_class = TitlesPagination
 
     def get_queryset(self):

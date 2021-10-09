@@ -20,7 +20,6 @@ router_v1.register(
     CommentViewSet,
     basename='comments'
 )
-
 router_v1.register(
     r'users/<username: str>',
     UserViewSet,

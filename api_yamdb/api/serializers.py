@@ -6,7 +6,7 @@ from rest_framework_simplejwt.serializers import TokenObtainSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from reviews.models import (
-    Category, Genre, GenreTitle,
+    Category, Genre,
     Title, User, Review, Comment
 )
 
@@ -60,7 +60,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = (
-            'id', 'name', 'year', 'description', 'category',
+            'name', 'year', 'description', 'category',
             'genre',)
 
 
@@ -91,6 +91,17 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only=True,
         default=serializers.CurrentUserDefault()
     )
+
+    def validate(self, data):
+        user = self.context['request'].user
+        title_id = self.context['view'].kwargs.get('title_id')
+        if self.context['request'].method != 'POST':
+            return data
+        if Review.objects.filter(title=title_id, author=user).exists():
+            raise serializers.ValidationError(
+                'Вы уже оставляли отзыв на это произведение'
+            )
+        return data
 
     class Meta:
         model = Review

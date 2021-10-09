@@ -116,9 +116,9 @@ class Title(models.Model):
 class GenreTitle(models.Model):
     """В этой модели будут связаны id жанра и id произведения."""
     genre = models.ForeignKey(
-        Genre, on_delete=models.SET_NULL, blank=True, null=True,)
+        Genre, on_delete=models.CASCADE, blank=True, null=True,)
     title = models.ForeignKey(
-        Title, on_delete=models.SET_NULL, blank=True, null=True,)
+        Title, on_delete=models.CASCADE, blank=True, null=True,)
 
     def __str__(self):
         return f'{self.genre} {self.title}'
@@ -154,6 +154,11 @@ class Review(models.Model):
         ordering = ('-pub_date',)
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
+        constraints = [
+            models.UniqueConstraint(
+                fields=('author', 'title'), name='unique_reviewing'
+            )
+        ]
 
     def __str__(self):
         return f'Отзыв {self.text} от {self.author} на {self.title}'
