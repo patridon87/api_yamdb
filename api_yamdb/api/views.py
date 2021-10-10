@@ -7,21 +7,18 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin)
-from rest_framework import permissions
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .pagination import TitlesPagination
-from .permissions import IsAdminOrReadOnly, IsOwnerOrReadOnly, IsAdmin, ReviewCommentPermission
-from .serializers import (CategorySerializer, UserRegistrationSerializer, GenreSerializer, CommentSerializer,
-                          TitleReadSerializer, TitleSerializer, ReviewSerializer,
-                          UserSerializer, UserProfileSerializer)
+from .permissions import IsAdminOrReadOnly, IsAdmin, ReviewCommentPermission
+from .serializers import (
+    CategorySerializer, UserRegistrationSerializer, GenreSerializer,
+    CommentSerializer, TitleReadSerializer, TitleSerializer,
+    ReviewSerializer, UserSerializer, UserProfileSerializer)
 
 from reviews.models import (Comment, Category, Genre,
                             Title, User, Review)
-
-
 
 
 @api_view(['POST'])
@@ -91,14 +88,19 @@ def user_profile(request):
     if request.user.is_authenticated:
         user = request.user
         if request.method == "PATCH":
-            serializer = UserProfileSerializer(user, data=request.data, partial=True, context={'request': request})
+            serializer = UserProfileSerializer(
+                user, data=request.data,
+                partial=True, context={'request': request})
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         serializer = UserSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response(data='Пожалуйста, авторизуйтесь', status=status.HTTP_401_UNAUTHORIZED)
+    return Response(
+        data='Пожалуйста, авторизуйтесь',
+        status=status.HTTP_401_UNAUTHORIZED)
 
 
 class ListCreateDestroyViewSet(GenericViewSet, CreateModelMixin,
@@ -142,11 +144,16 @@ class TitleViewSet(ModelViewSet):
     Only admin or moderator can create, edit or delete title.
     Filter by category, genre, title, year.
     """
-    queryset = Title.objects.all()
+    # queryset = Title.objects.all()
     pagination_class = TitlesPagination
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['category__slug', 'genre__slug', 'name', 'year', ]
+    # filterset_fields = ['category__slug', 'genre__slug', 'name', 'year', ]
+    filterset_fields = ['name', 'year', ]
+
     permission_classes = [IsAdminOrReadOnly]
+
+    def get_queryset(self):
+        return Title.objects.all()
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
