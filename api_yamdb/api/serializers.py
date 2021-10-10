@@ -72,8 +72,8 @@ class TitleReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = (
-            'id', 'name', 'year', 'description', 'category',
-            'genres', 'rating')
+            'id', 'name', 'year', 'description',
+            'genres', 'category', 'rating')
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -96,17 +96,34 @@ class TitleSerializer(serializers.ModelSerializer):
             )
         return value
 
+    # def create(self, validated_data):
+    #     if 'genres' not in self.initial_data:
+    #         return Title.objects.create(**validated_data)
+    #     else:
+    #         genres = validated_data.pop('genres')
+    #         title = Title.objects.create(**validated_data)
+    #         for genre in genres:
+    #             current_genre, status = Genre.objects.get_or_create(
+    #                 **genre)
+    #             GenreTitle.objects.create(
+    #                 genre=current_genre, title=title)
+    #         return title
+
     def create(self, validated_data):
         if 'genres' not in self.initial_data:
-            return Title.objects.create(**validated_data)
+            raise serializers.ValidationError(
+                'Поле жанр обязательно для заполнения!')
         else:
             genres = validated_data.pop('genres')
-            title = Title.objects.create(**validated_data)
             for genre in genres:
                 current_genre, status = Genre.objects.get_or_create(
                     **genre)
-                GenreTitle.objects.create(
-                    genre=current_genre, title=title)
+                genre.save()
+                title = Title.objects.create(**validated_data)
+                title.save()
+                # title.genres.add(genre)
+                # GenreTitle.objects.create(
+                #     genre=current_genre, title=title)
             return title
 
 
