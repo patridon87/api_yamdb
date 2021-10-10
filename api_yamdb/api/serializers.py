@@ -4,7 +4,7 @@ from django.db.models import Avg
 from rest_framework import serializers
 
 from reviews.models import (
-    Category, Genre, GenreTitle,
+    Category, Genre,
     Title, User, Review, Comment
 )
 
@@ -72,8 +72,8 @@ class TitleReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = (
-            'id', 'name', 'year', 'description',
-            'genres', 'category', 'rating')
+            'id', 'name', 'year', 'rating', 'description',
+            'genres', 'category', )
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -86,7 +86,9 @@ class TitleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Title
-        fields = ('name', 'year', 'description', 'category', 'genres',)
+        fields = (
+            'id', 'name', 'year', 'description',
+            'genres', 'category',)
 
     def validate_year(self, value):
         current_year = dt.datetime.now().year
@@ -95,36 +97,6 @@ class TitleSerializer(serializers.ModelSerializer):
                 'Год выпуска не может быть меньше 0 или больше текущего года!'
             )
         return value
-
-    # def create(self, validated_data):
-    #     if 'genres' not in self.initial_data:
-    #         return Title.objects.create(**validated_data)
-    #     else:
-    #         genres = validated_data.pop('genres')
-    #         title = Title.objects.create(**validated_data)
-    #         for genre in genres:
-    #             current_genre, status = Genre.objects.get_or_create(
-    #                 **genre)
-    #             GenreTitle.objects.create(
-    #                 genre=current_genre, title=title)
-    #         return title
-
-    def create(self, validated_data):
-        if 'genres' not in self.initial_data:
-            raise serializers.ValidationError(
-                'Поле жанр обязательно для заполнения!')
-        else:
-            genres = validated_data.pop('genres')
-            for genre in genres:
-                current_genre, status = Genre.objects.get_or_create(
-                    **genre)
-                genre.save()
-                title = Title.objects.create(**validated_data)
-                title.save()
-                # title.genres.add(genre)
-                # GenreTitle.objects.create(
-                #     genre=current_genre, title=title)
-            return title
 
 
 class ReviewSerializer(serializers.ModelSerializer):
