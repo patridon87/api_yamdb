@@ -41,12 +41,6 @@ def signUp(request):
         token = default_token_generator.make_token(user)
         send_email(user, token)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-    if User.objects.filter(**request.data).exists():
-        user = User.objects.get(**request.data)
-        token = default_token_generator.make_token(user)
-        send_email(user, token)
-        return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
