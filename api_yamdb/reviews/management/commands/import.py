@@ -24,7 +24,7 @@ class Command(BaseCommand):
             self.stdout.write(str(err))
             return
 
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             reader = csv.reader(file, delimiter=',')
             header = reader.__next__()
             for row in reader:
