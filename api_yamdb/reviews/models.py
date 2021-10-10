@@ -2,7 +2,6 @@ import datetime as dt
 
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
-
 from django.db import models
 
 
@@ -17,7 +16,7 @@ class User(AbstractUser):
         blank=True
     )
     role = models.CharField(max_length=300, choices=ROLES, default=ROLES[0][0])
-    
+
     def is_admin(self):
         if self.role == 'admin':
             self.is_staff = True
@@ -99,10 +98,9 @@ class Title(models.Model):
         verbose_name='Категория произведения',
         related_name='titles',
     )
-    genre = models.ManyToManyField(
+    genres = models.ManyToManyField(
         Genre,
         through='GenreTitle',
-        through_fields=('title', 'genre'),
     )
 
     class Meta:
@@ -116,13 +114,16 @@ class Title(models.Model):
 
 class GenreTitle(models.Model):
     """В этой модели будут связаны id жанра и id произведения."""
-    genre = models.ForeignKey(
-        Genre, on_delete=models.CASCADE, blank=True, null=True,)
     title = models.ForeignKey(
-        Title, on_delete=models.CASCADE, blank=True, null=True,)
+        Title, on_delete=models.SET_NULL, blank=True, null=True,)
+    genre = models.ForeignKey(
+        Genre, on_delete=models.SET_NULL, blank=True, null=True,)
+
+    class Meta:
+        unique_together = [['title', 'genre']]
 
     def __str__(self):
-        return f'{self.genre} {self.title}'
+        return f'{self.title} {self.genre}'
 
 
 class Review(models.Model):
@@ -190,4 +191,3 @@ class Comment(models.Model):
 
     def __str__(self):
         return f'Комментарий {self.text} от {self.author} к {self.review}'
-        
