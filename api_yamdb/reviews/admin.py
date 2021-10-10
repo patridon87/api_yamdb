@@ -27,7 +27,7 @@ class TitleAdmin(admin.ModelAdmin):
     list_display = ('pk', 'name', 'year', 'category', 'description')
     empty_value_display = '-пусто-'
     search_fields = ('name',)
-    list_filter = ('category', 'year', 'genre')
+    list_filter = ('category', 'year', 'genres')
 
 
 class ReviewAdmin(admin.ModelAdmin):
