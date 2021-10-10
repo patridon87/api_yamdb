@@ -4,7 +4,7 @@ from django.db.models import Avg
 from rest_framework import serializers
 
 from reviews.models import (
-    Category, Genre,
+    Category, Genre, GenreTitle,
     Title, User, Review, Comment
 )
 
@@ -44,26 +44,23 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return data
 
 
-
 class CategorySerializer(serializers.ModelSerializer):
-    category_name = serializers.CharField(source='name')
 
     class Meta:
         model = Category
-        fields = ('category_name', 'slug')
+        fields = ('name', 'slug')
 
 
 class GenreSerializer(serializers.ModelSerializer):
-    genre_name = serializers.CharField(source='name')
 
     class Meta:
         model = Genre
-        fields = ('genre_name', 'slug')
+        fields = ('name', 'slug')
 
 
 class TitleReadSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
-    genre = GenreSerializer(many=True)
+    genres = GenreSerializer(many=True)
     rating = serializers.SerializerMethodField()
 
     def get_rating(self, obj):
@@ -76,20 +73,20 @@ class TitleReadSerializer(serializers.ModelSerializer):
         model = Title
         fields = (
             'id', 'name', 'year', 'description', 'category',
-            'genre', 'rating')
+            'genres', 'rating')
 
 
 class TitleSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         slug_field='slug', queryset=Category.objects.all()
     )
-    genre = serializers.SlugRelatedField(
-        slug_field='slug', many=True, queryset=Category.objects.all()
+    genres = serializers.SlugRelatedField(
+        slug_field='slug', many=True, queryset=Genre.objects.all()
     )
 
     class Meta:
         model = Title
-        fields = ('name', 'year', 'description', 'category', 'genre',)
+        fields = ('name', 'year', 'description', 'category', 'genres',)
 
     def validate_year(self, value):
         current_year = dt.datetime.now().year
@@ -98,6 +95,19 @@ class TitleSerializer(serializers.ModelSerializer):
                 'Год выпуска не может быть меньше 0 или больше текущего года!'
             )
         return value
+
+    def create(self, validated_data):
+        if 'genres' not in self.initial_data:
+            return Title.objects.create(**validated_data)
+        else:
+            genres = validated_data.pop('genres')
+            title = Title.objects.create(**validated_data)
+            for genre in genres:
+                current_genre, status = Genre.objects.get_or_create(
+                    **genre)
+                GenreTitle.objects.create(
+                    genre=current_genre, title=title)
+            return title
 
 
 class ReviewSerializer(serializers.ModelSerializer):
