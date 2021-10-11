@@ -143,11 +143,10 @@ class TitleViewSet(ModelViewSet):
     Only admin or moderator can create, edit or delete title.
     Filter by category, genre, title, year.
     """
-    # queryset = Title.objects.all()
+
     pagination_class = TitlesPagination
     filter_backends = [DjangoFilterBackend]
-    # filterset_fields = ['category__slug', 'genre__slug', 'name', 'year', ]
-    filterset_fields = ['name', 'year', ]
+    filterset_fields = ['genre', 'category', 'year', 'name']
 
     permission_classes = [IsAdminOrReadOnly]
 

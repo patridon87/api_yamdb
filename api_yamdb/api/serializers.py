@@ -60,7 +60,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleReadSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
-    genres = GenreSerializer(many=True)
+    genre = GenreSerializer(many=True)
     rating = serializers.SerializerMethodField()
 
     def get_rating(self, obj):
@@ -73,14 +73,14 @@ class TitleReadSerializer(serializers.ModelSerializer):
         model = Title
         fields = (
             'id', 'name', 'year', 'rating', 'description',
-            'genres', 'category', )
+            'genre', 'category', )
 
 
 class TitleSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
         slug_field='slug', queryset=Category.objects.all()
     )
-    genres = serializers.SlugRelatedField(
+    genre = serializers.SlugRelatedField(
         slug_field='slug', many=True, queryset=Genre.objects.all()
     )
 
@@ -88,7 +88,7 @@ class TitleSerializer(serializers.ModelSerializer):
         model = Title
         fields = (
             'id', 'name', 'year', 'description',
-            'genres', 'category',)
+            'genre', 'category',)
 
     def validate_year(self, value):
         current_year = dt.datetime.now().year

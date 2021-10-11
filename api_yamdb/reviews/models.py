@@ -98,7 +98,7 @@ class Title(models.Model):
         verbose_name='Категория произведения',
         related_name='titles',
     )
-    genres = models.ManyToManyField(
+    genre = models.ManyToManyField(
         Genre,
         through='GenreTitle',
     )
