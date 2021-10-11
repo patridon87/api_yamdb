@@ -146,7 +146,7 @@ class TitleViewSet(ModelViewSet):
 
     pagination_class = TitlesPagination
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['genre', 'category', 'year', 'name']
+    filterset_fields = ['genre__slug', 'category__slug', 'year', 'name']
 
     permission_classes = [IsAdminOrReadOnly]
 
