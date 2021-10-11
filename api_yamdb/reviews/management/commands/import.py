@@ -1,6 +1,8 @@
 """
 Для импорта данных выполните команду:
- python manage.py import --path "/home/sergey/Dev/api_yamdb/api_yamdb/static/data/users.csv" --model_name "reviews.User" # noqa
+ python manage.py import
+ --path "/home/sergey/Dev/api_yamdb/api_yamdb/static/data/users.csv"
+ --model_name "reviews.User"
 """
 import csv
 
