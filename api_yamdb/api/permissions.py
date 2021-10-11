@@ -50,4 +50,5 @@ class ReviewCommentPermission(permissions.BasePermission):
         if not request.user.is_authenticated:
             return False
         return (obj.author == request.user
-                or request.user.role in ("moderator", "admin"))
+                or request.user.role in ("moderator", "admin")
+                or request.user.is_superuser)
