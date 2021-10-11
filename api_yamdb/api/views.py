@@ -10,6 +10,7 @@ from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from .filters import TitleFilter
 from .pagination import TitlesPagination
 from .permissions import IsAdminOrReadOnly, IsAdmin, ReviewCommentPermission
 from .serializers import (
@@ -146,7 +147,7 @@ class TitleViewSet(ModelViewSet):
 
     pagination_class = TitlesPagination
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['genre__slug', 'category__slug', 'year', 'name']
+    filterset_class = TitleFilter
 
     permission_classes = [IsAdminOrReadOnly]
 
