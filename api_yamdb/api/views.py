@@ -9,6 +9,7 @@ from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.db.models import Avg
 
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
@@ -80,7 +81,7 @@ def get_token(request):
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    queryset = User.objects.all().order_by('username')
     lookup_field = "username"
     serializer_class = UserSerializer
     permission_classes = [IsAdmin]
@@ -159,15 +160,13 @@ class TitleViewSet(ModelViewSet):
     Only admin or moderator can create, edit or delete title.
     Filter by category, genre, title, year.
     """
-
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score')).order_by('name')
     pagination_class = TitlesPagination
     filter_backends = [DjangoFilterBackend]
     filterset_class = TitleFilter
 
     permission_classes = [IsAdminOrReadOnly]
-
-    def get_queryset(self):
-        return Title.objects.all()
 
     def get_serializer_class(self):
         if self.request.method == "GET":

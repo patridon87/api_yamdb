@@ -1,8 +1,10 @@
-import datetime as dt
+
 
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
+from .validators import validate_title_year
 
 
 class User(AbstractUser):
@@ -86,9 +88,7 @@ class Title(models.Model):
     )
     year = models.PositiveIntegerField(
         verbose_name="Год создания",
-        validators=[
-            MinValueValidator(0), MaxValueValidator(dt.datetime.now().year)
-        ],
+        validators=[validate_title_year],
         help_text="Используйте формат года: YYYY",
     )
     description = models.TextField(
