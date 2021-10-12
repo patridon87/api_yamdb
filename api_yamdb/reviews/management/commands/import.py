@@ -19,12 +19,9 @@ class Command(BaseCommand):
         parser.add_argument("--model_name", type=str, help="model name")
 
     def handle(self, *args, **options):
-        try:
-            file_path = options["path"]
-            model = apps.get_model(options["model_name"])
-        except Exception as err:
-            self.stdout.write(str(err))
-            return
+        file_path = options["path"]
+        model = apps.get_model(options["model_name"])
+
 
         with open(file_path, "r", encoding="utf-8") as file:
             reader = csv.reader(file, delimiter=",")
@@ -36,6 +33,3 @@ class Command(BaseCommand):
                 except IntegrityError as err:
                     line = ", ".join(row)
                     self.stdout.write(f'Error! {err}, "{line}"')
-
-                except Exception as err:
-                    self.stdout.write(str(err))
