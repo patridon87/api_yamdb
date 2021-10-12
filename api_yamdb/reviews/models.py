@@ -23,7 +23,7 @@ class User(AbstractUser):
         return self.is_superuser or self.role in ('admin', 'moderator')
 
     def __str__(self):
-        return f"{self.username}"
+        return self.username
 
 
 class Category(models.Model):
