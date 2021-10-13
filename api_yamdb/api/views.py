@@ -13,8 +13,8 @@ from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.db.models import Avg
 
-from reviews.models import Category, Comment, Genre, Review, Title, User
-
+from reviews.models import Category, Comment, Genre, Review, Title
+from users.models import User
 from .filters import TitleFilter
 from .pagination import TitlesPagination
 from .permissions import IsAdmin, IsAdminOrReadOnly, ReviewCommentPermission
@@ -33,7 +33,7 @@ from .serializers import (
 
 
 @api_view(["POST"])
-def signUp(request):
+def sign_up(request):
     def send_email(user):
         token = default_token_generator.make_token(user)
         send_mail(
@@ -105,7 +105,9 @@ class UserProfile(APIView):
     def patch(self, request):
         if request.user.is_authenticated:
             user = request.user
-            serializer = UserProfileSerializer(user, data=request.data, partial=True)
+            serializer = UserProfileSerializer(
+                user, data=request.data, partial=True
+            )
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)

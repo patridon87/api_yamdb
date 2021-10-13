@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "django_filters",
     "api",
+    "users",
     "reviews",
 ]
 
@@ -111,7 +112,7 @@ STATIC_URL = "/static/"
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static/"),)
 
-AUTH_USER_MODEL = "reviews.User"
+AUTH_USER_MODEL = "users.User"
 
 if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

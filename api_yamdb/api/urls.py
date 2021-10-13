@@ -9,7 +9,7 @@ from .views import (
     TitleViewSet,
     UserViewSet,
     get_token,
-    signUp,
+    sign_up,
     UserProfile,
 )
 
@@ -31,7 +31,7 @@ router_v1.register(
 router_v1.register(r"users/<username: str>", UserViewSet, basename="users")
 
 urlpatterns = [
-    path("v1/auth/signup/", signUp, name="signup"),
+    path("v1/auth/signup/", sign_up, name="signup"),
     path("v1/auth/token/", get_token, name="get_token"),
     path("v1/users/me/", UserProfile.as_view()),
     path("v1/", include(router_v1.urls)),
