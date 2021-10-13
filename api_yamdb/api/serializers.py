@@ -16,6 +16,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return data
 
 
+class UserTokenSerializer(serializers.ModelSerializer):
+    confirmation_code = serializers.CharField(required=True)
+    class Meta:
+        model = User
+        fields = ("username", "confirmation_code")
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -30,14 +37,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = (
             "username", "email", "first_name", "last_name", "bio", "role"
         )
-
-    def validate(self, data):
-        request = self.context["request"]
-        method = request.method
-        user = request.user
-        if method == "PATCH" and user.role == "user" and "role" in data:
-            data.pop("role")
-        return data
+        read_only_fields = ('role',)
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -91,7 +91,7 @@ class TitleSerializer(serializers.ModelSerializer):
 
     def validate_year(self, value):
         current_year = dt.datetime.now().year
-        if 0 > value > current_year:
+        if value > current_year:
             raise serializers.ValidationError(
                 "Год выпуска не может быть меньше 0 или больше текущего года!"
             )

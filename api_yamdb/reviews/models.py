@@ -16,12 +16,16 @@ class User(AbstractUser):
     bio = models.TextField(verbose_name="Биография", blank=True)
     role = models.CharField(max_length=300, choices=ROLES, default=ROLES[0][0])
 
+    @property
     def is_admin(self):
-        if self.role == "admin":
-            self.is_staff = True
+        return self.is_superuser or self.role == 'admin'
+
+    @property
+    def is_moderator(self):
+        return self.is_superuser or self.role in ('admin', 'moderator')
 
     def __str__(self):
-        return f"{self.username}"
+        return self.username
 
 
 class Category(models.Model):
