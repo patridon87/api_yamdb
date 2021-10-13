@@ -182,13 +182,13 @@ class ReviewViewSet(viewsets.ModelViewSet):
         title = get_object_or_404(Title, id=title_id)
         return Review.objects.filter(title=title)
 
-    def perform_create(self, data):
+    def perform_create(self, serializer):
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
         if Review.objects.filter(
             author=self.request.user, title=title
         ).exists():
             raise ValidationError('Вы уже оставляли отзыв на это произведение')
-        data.save(author=self.request.user, title=title)
+        serializer.save(author=self.request.user, title=title)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
