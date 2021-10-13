@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import api_view
+from rest_framework.exceptions import ValidationError
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin)
 from rest_framework.response import Response
@@ -176,12 +177,16 @@ class ReviewViewSet(viewsets.ModelViewSet):
     pagination_class = TitlesPagination
 
     def get_queryset(self):
-        title_id = self.kwargs.get("title_id")
-        return Review.objects.filter(title__pk=title_id)
+        title_id = self.kwargs.get('title_id')
+        title = get_object_or_404(Title, id=title_id)
+        return Review.objects.filter(title=title)
 
     def perform_create(self, serializer):
-        title_id = self.kwargs.get("title_id")
-        title = get_object_or_404(Title, pk=title_id)
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        if Review.objects.filter(
+            author=self.request.user, title=title
+        ).exists():
+            raise ValidationError('Вы уже оставляли отзыв на это произведение')
         serializer.save(author=self.request.user, title=title)
 
 
