@@ -1,8 +1,9 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from .validators import validate_title_year
 from users.models import User
+
+from .validators import validate_title_year
 
 
 class Category(models.Model):
@@ -132,7 +133,8 @@ class Review(models.Model):
     )
     text = models.TextField(null=False, verbose_name="Отзыв")
     pub_date = models.DateTimeField(
-        verbose_name="Дата публикации", auto_now_add=True
+        verbose_name="Дата публикации",
+        auto_now_add=True
     )
     title = models.ForeignKey(
         Title,
@@ -155,7 +157,8 @@ class Review(models.Model):
         verbose_name_plural = "Отзывы"
         constraints = [
             models.UniqueConstraint(
-                fields=("author", "title"), name="unique_reviewing"
+                fields=("author", "title"),
+                name="unique_reviewing"
             )
         ]
 
@@ -172,7 +175,8 @@ class Comment(models.Model):
     )
     text = models.TextField(verbose_name="Комментарий")
     pub_date = models.DateTimeField(
-        verbose_name="Дата публикации", auto_now_add=True
+        verbose_name="Дата публикации",
+        auto_now_add=True
     )
     review = models.ForeignKey(
         Review,

@@ -19,6 +19,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 class UserTokenSerializer(serializers.ModelSerializer):
     confirmation_code = serializers.CharField(required=True)
+
     class Meta:
         model = User
         fields = ("username", "confirmation_code")
@@ -28,17 +29,26 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            "username", "email", "first_name", "last_name", "bio", "role"
-        )
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "bio",
+            "role")
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            "username", "email", "first_name", "last_name", "bio", "role"
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "bio",
+            "role"
         )
-        read_only_fields = ('role',)
+        read_only_fields = ("role",)
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -119,7 +129,8 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
-        read_only=True, slug_field="username"
+        read_only=True,
+        slug_field="username"
     )
 
     class Meta:

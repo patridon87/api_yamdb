@@ -22,7 +22,6 @@ class Command(BaseCommand):
         file_path = options["path"]
         model = apps.get_model(options["model_name"])
 
-
         with open(file_path, "r", encoding="utf-8") as file:
             reader = csv.reader(file, delimiter=",")
             header = reader.__next__()

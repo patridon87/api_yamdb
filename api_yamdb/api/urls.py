@@ -7,10 +7,10 @@ from .views import (
     GenreViewSet,
     ReviewViewSet,
     TitleViewSet,
+    UserProfile,
     UserViewSet,
     get_token,
     sign_up,
-    UserProfile,
 )
 
 router_v1 = SimpleRouter()

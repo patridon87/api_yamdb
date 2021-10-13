@@ -1,20 +1,24 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ValidationError
-from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
-                                   ListModelMixin)
+from rest_framework.mixins import (
+    CreateModelMixin,
+    DestroyModelMixin,
+    ListModelMixin
+)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.db.models import Avg
 
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
+
 from .filters import TitleFilter
 from .pagination import TitlesPagination
 from .permissions import IsAdmin, IsAdminOrReadOnly, ReviewCommentPermission
@@ -70,23 +74,21 @@ def get_token(request):
     serializer = UserTokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     if default_token_generator.check_token(
-            user=serializer.instance,
-            token=serializer.data["confirmation_code"]):
-        return Response(get_tokens_for_user(user=serializer.instance)
-                        )
+        user=serializer.instance, token=serializer.data["confirmation_code"]
+    ):
+        return Response(get_tokens_for_user(user=serializer.instance))
     if not serializer.instance:
         return Response(
-            data='Пользователь не найден',
+            data="Пользователь не найден",
             status=status.HTTP_404_NOT_FOUND
         )
     return Response(
-        data="Код подтверждения не верный",
-        status=status.HTTP_400_BAD_REQUEST
+        data="Код подтверждения не верный", status=status.HTTP_400_BAD_REQUEST
     )
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all().order_by('username')
+    queryset = User.objects.all().order_by("username")
     lookup_field = "username"
     serializer_class = UserSerializer
     permission_classes = [IsAdmin]
@@ -99,20 +101,25 @@ class UserProfile(APIView):
             user = request.user
             serializer = UserSerializer(user)
             return Response(serializer.data)
-        return Response(data="Пожалуйста, авторизуйтесь",
-                        status=status.HTTP_401_UNAUTHORIZED)
+        return Response(
+            data="Пожалуйста, авторизуйтесь",
+            status=status.HTTP_401_UNAUTHORIZED
+        )
 
     def patch(self, request):
         if request.user.is_authenticated:
             user = request.user
             serializer = UserProfileSerializer(
-                user, data=request.data, partial=True
+                user, data=request.data,
+                partial=True
             )
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(data="Пожалуйста, авторизуйтесь",
-                        status=status.HTTP_401_UNAUTHORIZED)
+        return Response(
+            data="Пожалуйста, авторизуйтесь",
+            status=status.HTTP_401_UNAUTHORIZED
+        )
 
 
 class ListCreateDestroyViewSet(
@@ -159,8 +166,9 @@ class TitleViewSet(ModelViewSet):
     Only admin or moderator can create, edit or delete title.
     Filter by category, genre, title, year.
     """
+
     queryset = Title.objects.annotate(
-        rating=Avg('reviews__score')).order_by('name')
+        rating=Avg("reviews__score")).order_by("name")
     pagination_class = TitlesPagination
     filter_backends = [DjangoFilterBackend]
     filterset_class = TitleFilter
@@ -179,16 +187,15 @@ class ReviewViewSet(viewsets.ModelViewSet):
     pagination_class = TitlesPagination
 
     def get_queryset(self):
-        title_id = self.kwargs.get('title_id')
+        title_id = self.kwargs.get("title_id")
         title = get_object_or_404(Title, id=title_id)
         return Review.objects.filter(title=title)
 
     def perform_create(self, serializer):
-        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        title = get_object_or_404(Title, id=self.kwargs.get("title_id"))
         if Review.objects.filter(
-            author=self.request.user, title=title
-        ).exists():
-            raise ValidationError('Вы уже оставляли отзыв на это произведение')
+                author=self.request.user, title=title).exists():
+            raise ValidationError("Вы уже оставляли отзыв на это произведение")
         serializer.save(author=self.request.user, title=title)
 
 
