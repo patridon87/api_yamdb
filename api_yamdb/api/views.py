@@ -9,7 +9,9 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.mixins import (
     CreateModelMixin,
     DestroyModelMixin,
-    ListModelMixin
+    ListModelMixin,
+    RetrieveModelMixin,
+    UpdateModelMixin
 )
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -21,7 +23,12 @@ from users.models import User
 
 from .filters import TitleFilter
 from .pagination import TitlesPagination
-from .permissions import IsAdmin, IsAdminOrReadOnly, ReviewCommentPermission
+from .permissions import (
+    IsAdmin,
+    IsAdminOrReadOnly,
+    ReviewCommentPermission,
+    IsOwnerOrReadOnly
+)
 from .serializers import (
     CategorySerializer,
     CommentSerializer,
@@ -58,7 +65,6 @@ def sign_up(request):
     user = serializer.instance
     send_email(user)
     return Response(serializer.data, status=status.HTTP_200_OK)
-    # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 def get_tokens_for_user(user):
@@ -88,38 +94,48 @@ def get_token(request):
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all().order_by("username")
+    queryset = User.objects.all()
     lookup_field = "username"
     serializer_class = UserSerializer
+    filter_backends = [filters.OrderingFilter]
+    ordering = ["username"]
     permission_classes = [IsAdmin]
     http_method_names = ["get", "post", "patch", "delete"]
 
 
-class UserProfile(APIView):
-    def get(self, request):
-        if request.user.is_authenticated:
-            user = request.user
-            serializer = UserSerializer(user)
-            return Response(serializer.data)
-        return Response(
-            data="Пожалуйста, авторизуйтесь",
-            status=status.HTTP_401_UNAUTHORIZED
-        )
+class UserProfile(ModelViewSet):
+    permission_classes = [IsOwnerOrReadOnly]
+    http_method_names = ["get", "patch"]
 
-    def patch(self, request):
-        if request.user.is_authenticated:
-            user = request.user
-            serializer = UserProfileSerializer(
-                user, data=request.data,
-                partial=True
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(
-            data="Пожалуйста, авторизуйтесь",
-            status=status.HTTP_401_UNAUTHORIZED
-        )
+    def get_queryset(self):
+        return User.objects.get(pk=self.request.user.pk)
+
+    def get_serializer_class(self):
+        if self.request.method == "GET":
+            return UserSerializer
+        return UserProfileSerializer
+
+    # def retrieve(self, request):
+    #     querryset = User.objects.all()
+    #     serializer = UserSerializer(querryset, pk=request.user.pk)
+    #     if request.user.is_authenticated:
+    #         return Response(serializer.data)
+    #     return Response(
+    #         data="Пожалуйста, авторизуйтесь",
+    #         status=status.HTTP_401_UNAUTHORIZED
+    #     )
+    #
+    # def partial_update(self, request):
+    #     querryset = User.objects.all()
+    #     serializer = UserSerializer(querryset, pk=request.user.pk)
+    #     if request.user.is_authenticated:
+    #         serializer.is_valid(raise_exception=True)
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
+    #     return Response(
+    #         data="Пожалуйста, авторизуйтесь",
+    #         status=status.HTTP_401_UNAUTHORIZED
+    #     )
 
 
 class ListCreateDestroyViewSet(

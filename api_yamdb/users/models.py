@@ -17,7 +17,7 @@ class User(AbstractUser):
 
     @property
     def is_moderator(self):
-        return self.is_superuser or self.role in ("admin", "moderator")
+        return self.role == "moderator"
 
     def __str__(self):
         return self.username
