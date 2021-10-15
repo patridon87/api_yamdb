@@ -57,7 +57,7 @@ def sign_up(request):
 
     try:
         user = User.objects.get_or_create(email=email, username=username)[0]
-    except Exception:
+    except:
         return Response(
             "Введено неверное имя пользователя или Email",
             status=status.HTTP_400_BAD_REQUEST
