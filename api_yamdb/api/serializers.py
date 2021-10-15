@@ -6,15 +6,19 @@ from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
 
 
-class UserRegistrationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ("email", "username")
+class UserRegistrationSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    username = serializers.CharField(required=True)
 
     def validate(self, data):
         if data["username"] == "me":
             raise serializers.ValidationError("Имя пользователя me запрещено")
         return data
+
+
+class TokenConfirmationSerializer(serializers.Serializer):
+    username = serializers.CharField(required=True)
+    confirmation_code = serializers.CharField(required=True)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -27,20 +31,6 @@ class UserSerializer(serializers.ModelSerializer):
             "last_name",
             "bio",
             "role")
-
-
-class UserProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = (
-            "username",
-            "email",
-            "first_name",
-            "last_name",
-            "bio",
-            "role"
-        )
-        read_only_fields = ("role",)
 
 
 class CategorySerializer(serializers.ModelSerializer):

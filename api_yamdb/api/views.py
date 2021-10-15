@@ -4,14 +4,12 @@ from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets, permissions
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from rest_framework.exceptions import ValidationError
 from rest_framework.mixins import (
     CreateModelMixin,
     DestroyModelMixin,
     ListModelMixin,
-    RetrieveModelMixin,
-    UpdateModelMixin
 )
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
@@ -34,7 +32,7 @@ from .serializers import (
     ReviewSerializer,
     TitleReadSerializer,
     TitleSerializer,
-    UserProfileSerializer,
+    TokenConfirmationSerializer,
     UserRegistrationSerializer,
     UserSerializer,
 )
@@ -52,14 +50,19 @@ def sign_up(request):
         )
 
     serializer = UserRegistrationSerializer(data=request.data)
-    if User.objects.filter(**request.data).exists():
-        user = User.objects.get(**request.data)
-        send_email(user)
-        serializer.is_valid(raise_exception=False)
-        return Response(serializer.data, status=status.HTTP_200_OK)
     serializer.is_valid(raise_exception=True)
-    serializer.save()
-    user = serializer.instance
+
+    email = serializer.data["email"]
+    username = serializer.data["username"]
+
+    try:
+        user = User.objects.get_or_create(email=email, username=username)[0]
+    except:
+        return Response(
+            "Введено неверное имя пользователя или Email",
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
     send_email(user)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -74,20 +77,19 @@ def get_tokens_for_user(user):
 
 @api_view(["POST"])
 def get_token(request):
-    username = request.data.get("username")
-    token = request.data.get("confirmation_code")
+    serializer = TokenConfirmationSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
 
-    if username is not None and token is not None:
-        user = get_object_or_404(User, username=username)
-        if default_token_generator.check_token(user, token):
-            return Response(get_tokens_for_user(user))
-        return Response(
-            data="Код подтверждения не верный",
-            status=status.HTTP_400_BAD_REQUEST
-        )
+    username = serializer.data.get("username")
+    confirmation_code = serializer.data.get("confirmation_code")
 
-    return Response(data="Пользователь не найден",
-                    status=status.HTTP_400_BAD_REQUEST)
+    user = get_object_or_404(User, username=username)
+    if default_token_generator.check_token(user, confirmation_code):
+        return Response(get_tokens_for_user(user))
+    return Response(
+        data="Код подтверждения не верный",
+        status=status.HTTP_400_BAD_REQUEST
+    )
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -99,20 +101,22 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdmin]
     http_method_names = ["get", "post", "patch", "delete"]
 
+    @action(
+        detail=False,
+        methods=["get", "patch"],
+        permission_classes=[permissions.IsAuthenticated]
+    )
+    def me(self, request):
+        user = request.user
+        if request.method == "GET":
+            serializer = self.get_serializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
-class UserProfile(GenericViewSet, RetrieveModelMixin, UpdateModelMixin):
-    permission_classes = [permissions.IsAuthenticated]
-    queryset = User.objects.all()
-    lookup_field = None
-    lookup_url_kwarg = None
+        serializer = self.get_serializer(user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
 
-    def get_object(self):
-        return User.objects.get(pk=self.request.user.pk)
-
-    def get_serializer_class(self):
-        if self.request.method == "GET":
-            return UserSerializer
-        return UserProfileSerializer
+        serializer.save(role=user.role, partial=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ListCreateDestroyViewSet(

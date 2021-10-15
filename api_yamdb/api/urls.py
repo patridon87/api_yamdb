@@ -1,24 +1,20 @@
 from django.urls import include, path
 from rest_framework.routers import SimpleRouter
 
-from .routers import MeRouter
 from .views import (
     CategoryViewSet,
     CommentViewSet,
     GenreViewSet,
     ReviewViewSet,
     TitleViewSet,
-    UserProfile,
     UserViewSet,
     get_token,
     sign_up,
 )
 
-router_me = MeRouter()
 router_v1 = SimpleRouter()
 
 
-router_me.register(r"", UserProfile, basename="me")
 router_v1.register(r"categories", CategoryViewSet, basename="categories")
 router_v1.register(r"genres", GenreViewSet, basename="genres")
 router_v1.register(r"titles", TitleViewSet, basename="titles")
@@ -37,6 +33,5 @@ router_v1.register(r"users/<username: str>", UserViewSet, basename="users")
 urlpatterns = [
     path("v1/auth/signup/", sign_up, name="signup"),
     path("v1/auth/token/", get_token, name="get_token"),
-    path("v1/users/me/", include(router_me.urls)),
     path("v1/", include(router_v1.urls)),
 ]
