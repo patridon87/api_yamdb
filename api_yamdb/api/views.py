@@ -3,7 +3,7 @@ from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, status, viewsets
+from rest_framework import filters, status, viewsets, permissions
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ValidationError
 from rest_framework.mixins import (
@@ -14,7 +14,6 @@ from rest_framework.mixins import (
     UpdateModelMixin
 )
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -27,7 +26,6 @@ from .permissions import (
     IsAdmin,
     IsAdminOrReadOnly,
     ReviewCommentPermission,
-    IsOwnerOrReadOnly
 )
 from .serializers import (
     CategorySerializer,
@@ -39,7 +37,6 @@ from .serializers import (
     UserProfileSerializer,
     UserRegistrationSerializer,
     UserSerializer,
-    UserTokenSerializer,
 )
 
 
@@ -77,20 +74,20 @@ def get_tokens_for_user(user):
 
 @api_view(["POST"])
 def get_token(request):
-    serializer = UserTokenSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
-    if default_token_generator.check_token(
-        user=serializer.instance, token=serializer.data["confirmation_code"]
-    ):
-        return Response(get_tokens_for_user(user=serializer.instance))
-    if not serializer.instance:
+    username = request.data.get("username")
+    token = request.data.get("confirmation_code")
+
+    if username is not None and token is not None:
+        user = get_object_or_404(User, username=username)
+        if default_token_generator.check_token(user, token):
+            return Response(get_tokens_for_user(user))
         return Response(
-            data="Пользователь не найден",
-            status=status.HTTP_404_NOT_FOUND
+            data="Код подтверждения не верный",
+            status=status.HTTP_400_BAD_REQUEST
         )
-    return Response(
-        data="Код подтверждения не верный", status=status.HTTP_400_BAD_REQUEST
-    )
+
+    return Response(data="Пользователь не найден",
+                    status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -103,39 +100,19 @@ class UserViewSet(viewsets.ModelViewSet):
     http_method_names = ["get", "post", "patch", "delete"]
 
 
-class UserProfile(ModelViewSet):
-    permission_classes = [IsOwnerOrReadOnly]
-    http_method_names = ["get", "patch"]
+class UserProfile(GenericViewSet, RetrieveModelMixin, UpdateModelMixin):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = User.objects.all()
+    lookup_field = None
+    lookup_url_kwarg = None
 
-    def get_queryset(self):
+    def get_object(self):
         return User.objects.get(pk=self.request.user.pk)
 
     def get_serializer_class(self):
         if self.request.method == "GET":
             return UserSerializer
         return UserProfileSerializer
-
-    # def retrieve(self, request):
-    #     querryset = User.objects.all()
-    #     serializer = UserSerializer(querryset, pk=request.user.pk)
-    #     if request.user.is_authenticated:
-    #         return Response(serializer.data)
-    #     return Response(
-    #         data="Пожалуйста, авторизуйтесь",
-    #         status=status.HTTP_401_UNAUTHORIZED
-    #     )
-    #
-    # def partial_update(self, request):
-    #     querryset = User.objects.all()
-    #     serializer = UserSerializer(querryset, pk=request.user.pk)
-    #     if request.user.is_authenticated:
-    #         serializer.is_valid(raise_exception=True)
-    #         serializer.save()
-    #         return Response(serializer.data, status=status.HTTP_200_OK)
-    #     return Response(
-    #         data="Пожалуйста, авторизуйтесь",
-    #         status=status.HTTP_401_UNAUTHORIZED
-    #     )
 
 
 class ListCreateDestroyViewSet(

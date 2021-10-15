@@ -21,22 +21,6 @@ class IsAdminOrReadOnly(permissions.BasePermission):
                 )
 
 
-class IsOwnerOrReadOnly(permissions.BasePermission):
-    """
-    Object-level permission to only allow owners of an object to edit it.
-    Assumes the model instance has an `owner` attribute.
-    """
-
-    message = "Changing someone else's content is not allowed!"
-    def has_permission(self, request, view):
-        return request.user.is_authenticated
-
-    def has_object_permission(self, request, view, obj):
-        return (request.user.is_authenticated and (obj == request.user
-                or request.user.is_admin)
-                )
-
-
 class ReviewCommentPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return (request.method in permissions.SAFE_METHODS
