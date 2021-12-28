@@ -31,13 +31,13 @@
 в остальных случаях доступ предоставляется только для чтения.
 
 ### Технологии:
-django==2.2.16
-djangorestframework==3.12.4
-pytest==6.2.4
-pytest-django==4.4.0
-pytest-pythonpath==0.7.3
-djangorestframework-simplejwt==4.8.0
-django-filter==21.1
+- django 2.2.16
+- djangorestframework 3.12.4
+- pytest 6.2.4
+- pytest-django 4.4.0
+- pytest-pythonpath 0.7.3
+- djangorestframework-simplejwt 4.8.0
+- django-filter 21.1
 
 Модели: User, Category, Genre, Title, Review, Comment
 
